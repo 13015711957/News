@@ -3,7 +3,7 @@ from datetime import timedelta
 #设置配置信息
 class Config(object):
     #调试信息
-    DEGUG=True
+    DEGUG=False
 
     SECRET_KEY="137946"
 
@@ -23,10 +23,12 @@ class Config(object):
 
 #开发环境配置信息
 class DevelopConfig(Config):
+    DEGUG = True
     pass
 
 #生产环境配置信息
 class ProductConfig(Config):
+    DEGUG = False
     pass
 
 #测试环境配置信息
