@@ -8,6 +8,7 @@ from config import config_dict
 import logging
 
 redis_store=None
+db=SQLAlchemy()
 def creat_app(config_name):
 
     app=Flask(__name__)
@@ -22,7 +23,7 @@ def creat_app(config_name):
     app.config.from_object(config)
 
     #创建SQLAlchemy对象，关联app
-    db=SQLAlchemy(app)
+    db.init_app(app)
 
     #创建Redis对象
     global redis_store
