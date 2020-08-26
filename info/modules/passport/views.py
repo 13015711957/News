@@ -1,4 +1,7 @@
+
 import random
+from datetime import datetime
+
 from flask import request, current_app, make_response, jsonify, session
 from . import passport_blue
 from info import redis_store, constants, db
@@ -59,6 +62,8 @@ def login():
 
     # 6. 将用户的登陆信息保存在session中
     session['user_id'] = user.id
+    user.last_login=datetime.now()
+
     # 7. 返回响应
     return jsonify(errno=RET.OK, errmsg='登陆成功')
 
