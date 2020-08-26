@@ -7,6 +7,8 @@ from flask_session import Session
 from config import config_dict
 import logging
 
+from info.utils.commons import hot_news_filter
+
 redis_store = None
 db = SQLAlchemy()
 
@@ -43,6 +45,9 @@ def creat_app(config_name):
     # 将认证蓝图passport_blue注册到app中
     from .modules.passport import passport_blue
     app.register_blueprint(passport_blue)
+
+    # 将函数添加到系统默认的过滤器列表
+    app.add_template_filter(hot_news_filter, 'my_filter')
 
     # 使用请求钩子拦截所有请求，在cookie中设置csrf_token
     @app.after_request
