@@ -11,6 +11,7 @@ class Config(object):
 
     SECRET_KEY = "137946"
 
+
     # 数据库配置信息
     SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:123456@localhost:3306/info36"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
