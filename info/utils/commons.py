@@ -1,4 +1,9 @@
 # 自定义过滤器热门新闻颜色过滤
+from functools import wraps
+
+from flask import session, current_app, g
+
+
 def hot_news_filter(index):
     if index == 1:
         return 'first'
@@ -8,3 +13,18 @@ def hot_news_filter(index):
         return 'third'
     else:
         return ''
+
+def user_login_data(view_func):
+    @wraps(view_func)
+    def wrapper(*args,**kwargs):
+        user_id = session.get('user_id')
+        user = None
+        if user_id:
+            try:
+                from info.models import User
+                user = User.query.get(user_id)
+            except Exception as e:
+                current_app.logger.error(e)
+        g.user=user
+        return view_func(*args,**kwargs)
+    return wrapper

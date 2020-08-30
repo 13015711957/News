@@ -2,9 +2,10 @@ from sqlalchemy import text
 
 from . import index_blue
 from info import redis_store
-from flask import render_template, current_app, session, jsonify, request
+from flask import render_template, current_app, session, jsonify, request, g
 
 from ...models import *
+from ...utils.commons import user_login_data
 from ...utils.response_code import RET
 
 
@@ -55,17 +56,18 @@ def newslist():
 
 
 @index_blue.route('/', methods=['GET', 'POST'])
+@user_login_data
 def index():
-    # 1.获取用户登录信息
-    user_id = session.get('user_id')
-
-    # 2.通过user_id取出用户对象
-    user = None
-    if user_id:
-        try:
-            user = User.query.get(user_id)
-        except Exception as e:
-            current_app.logger.error(e)
+    # # 1.获取用户登录信息
+    # user_id = session.get('user_id')
+    #
+    # # 2.通过user_id取出用户对象
+    # user = None
+    # if user_id:
+    #     try:
+    #         user = User.query.get(user_id)
+    #     except Exception as e:
+    #         current_app.logger.error(e)
 
     # 3.查询热门新闻，查询点击量前十的新闻
     try:
@@ -93,7 +95,7 @@ def index():
 
     # 3.拼接用户数据，渲染页面
     data = {
-        'user_info': user.to_dict() if user else "",
+        'user_info': g.user.to_dict() if g.user else "",
         'news': news_list,
         'category_list': category_list
     }
