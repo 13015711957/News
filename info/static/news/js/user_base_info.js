@@ -28,9 +28,9 @@ $(function () {
             "nick_name": nick_name,
             "gender": gender
         }
-        /*
+
         $.ajax({
-            url: "/user/base_info",
+            url: "/profile/base_info",
             type: "post",
             contentType: "application/json",
             headers: {
@@ -48,6 +48,5 @@ $(function () {
                 }
             }
         })
-        */
     })
 })

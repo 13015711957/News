@@ -23,9 +23,9 @@ $(function () {
         }
 
         // TODO 修改密码
-        /*
+
         $.ajax({
-            url: "/user/pass_info",
+            url: "/profile/pass_info",
             type: "post",
             contentType: "application/json",
             headers: {
@@ -42,6 +42,5 @@ $(function () {
                 }
             }
         })
-        */
     })
 })
