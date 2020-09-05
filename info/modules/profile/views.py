@@ -7,6 +7,52 @@ from ...utils.commons import user_login_data
 from ...utils.image_storage import image_storage
 from ...utils.response_code import RET
 
+
+
+@profile_blue.route('/user_follow')
+@user_login_data
+def user_follow():
+    """
+    请求路径: /profile/user_follow
+    请求方式: GET
+    请求参数:p
+    返回值: 渲染user_follow.html页面,字典data数据
+    """
+    # 1. 获取参数,p
+    page = request.args.get("p", "1")
+
+    # 2. 参数类型转换
+    try:
+        page = int(page)
+    except Exception as e:
+        page = 1
+
+    # 3. 分页查询用户关注的作者
+    try:
+        paginate = g.user.followed.paginate(page, 2, False)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="获取作者失败")
+
+    # 4. 获取分页对象属性,总页数,当前页,当前页对象列表
+    totalPage = paginate.pages
+    currentPage = paginate.page
+    items = paginate.items
+
+    # 5. 将对象列表,转成字典列表
+    author_list = []
+    for author in items:
+        author_list.append(author.to_dict())
+
+    # 6. 拼接数据,渲染页面
+    data = {
+        "totalPage": totalPage,
+        "currentPage": currentPage,
+        "author_list": author_list
+    }
+    return render_template("news/user_follow.html", data=data)
+
+
 @profile_blue.route('/news_list')
 @user_login_data
 def news_list():
@@ -52,6 +98,7 @@ def news_list():
     }
     return render_template("news/user_news_list.html", data=data)
 
+
 @profile_blue.route('/news_release', methods=['GET', 'POST'])
 @user_login_data
 def news_release():
@@ -66,26 +113,26 @@ def news_release():
     if request.method == 'GET':
         # 2. 携带分类数据渲染页面
         try:
-            categories=Category.query.all()
+            categories = Category.query.all()
         except Exception as e:
             current_app.logger.error(e)
             return jsonify(errno=RET.DBERR, errmsg='获取分类失败')
 
-        category_list=[]
+        category_list = []
         for i in categories:
             category_list.append(i.to_dict())
 
-        return render_template('news/user_news_release.html',categories=category_list)
+        return render_template('news/user_news_release.html', categories=category_list)
 
     # 3. 如果是POST,获取参数
-    title=request.form.get('title')
-    category_id=request.form.get('category_id')
-    digest=request.form.get('digest')
-    index_image=request.files.get('index_image')
-    content=request.form.get('content')
+    title = request.form.get('title')
+    category_id = request.form.get('category_id')
+    digest = request.form.get('digest')
+    index_image = request.files.get('index_image')
+    content = request.form.get('content')
 
     # 4. 校验参数,为空校验
-    if not all([title, category_id,digest,index_image,content]):
+    if not all([title, category_id, digest, index_image, content]):
         return jsonify(errno=RET.PARAMERR, errmsg='参数不全')
 
     # 5. 上传图片,判断是否上传成功
@@ -99,15 +146,15 @@ def news_release():
         return jsonify(errno=RET.NODATA, errmsg='图片上传失败')
 
     # 6. 创建新闻对象,设置属性
-    news=News()
-    news.title=title
-    news.source=g.user.nick_name
-    news.digest=digest
-    news.content=content
-    news.index_image_url=constants.QINIU_DOMIN_PREFIX+image_name
-    news.category_id=category_id
+    news = News()
+    news.title = title
+    news.source = g.user.nick_name
+    news.digest = digest
+    news.content = content
+    news.index_image_url = constants.QINIU_DOMIN_PREFIX + image_name
+    news.category_id = category_id
     news.user_id = g.user.id
-    news.status=1 #表示审核中
+    news.status = 1  # 表示审核中
 
     # 7. 保存到数据
     try:

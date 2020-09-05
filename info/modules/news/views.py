@@ -6,6 +6,54 @@ from ...utils.commons import user_login_data
 from ...utils.response_code import RET
 
 
+@news_blue.route('/followed_user',methods=['POST'])
+@user_login_data
+def followed_user():
+    """
+    关注与取消关注
+    请求路径: /news/followed_user
+    请求方式: POST
+    请求参数:user_id,action
+    返回值: errno, errmsg
+    """
+    # - 0.判断用户是否登陆
+    if not g.user:
+        return jsonify(errno=RET.NODATA, errmsg="用户未登录")
+
+    # - 1.获取参数
+    author_id = request.json.get("user_id")
+    action = request.json.get("action")
+
+    # - 2.校验参数,为空校验
+    if not all([author_id, action]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数不全")
+
+    # - 3.校验操作类型
+    if not action in ["follow", "unfollow"]:
+        return jsonify(errno=RET.DATAERR, errmsg="操作类型有误")
+
+    # - 4.根据作者编号取出作者对象,判断作者对象是否存在
+    try:
+        author = User.query.get(author_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="获取作者失败")
+
+    if not author: return jsonify(errno=RET.NODATA, errmsg="该作者不存在")
+
+    # - 5.根据操作类型,进行关注&取消关注
+    if action == "follow":
+        # 5.1判断当前的用户是否关注了该作者
+        if not g.user in author.followers:
+            author.followers.append(g.user)
+    else:
+        # 5.2判断当前的用户是否关注了该作者
+        if g.user in author.followers:
+            author.followers.remove(g.user)
+
+    # - 6.返回响应
+    return jsonify(errno=RET.OK, errmsg="操作成功")
+
 @news_blue.route('/comment_like', methods=['POST'])
 @user_login_data
 def comment_like():
