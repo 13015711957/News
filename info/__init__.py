@@ -54,6 +54,10 @@ def creat_app(config_name):
     from .modules.profile import profile_blue
     app.register_blueprint(profile_blue)
 
+    # 将管理员蓝图admin_blue,注册到app中
+    from .modules.admin import admin_blue
+    app.register_blueprint(admin_blue)
+
     # 将函数添加到系统默认的过滤器列表
     app.add_template_filter(hot_news_filter, 'my_filter')
 
