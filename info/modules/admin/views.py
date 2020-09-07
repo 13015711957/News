@@ -9,6 +9,73 @@ from info.utils.image_storage import image_storage
 from info.utils.response_code import RET
 from . import admin_blue
 
+@admin_blue.route('/add_category', methods=['POST'])
+def add_category():
+    """
+    请求路径: /admin/add_category
+    请求方式: POST
+    请求参数: id,name
+    返回值:errno,errmsg
+    @return:
+    """
+    # 1.获取参数,id,name
+    category_id = request.json.get("id")
+    category_name = request.json.get("name")
+
+    # 2.校验参数,为空校验
+    if not category_name:
+        return jsonify(errno=RET.PARAMERR,errmsg="分类名称不能为空")
+
+    # 3.根据是否有id,来判断是新增还是编辑
+    if category_id: #编辑
+
+        #3.1通过分类编号取出分类对象,并判断分类对象是否存在
+        try:
+            category = Category.query.get(category_id)
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR,errmsg="获取分类失败")
+
+        if not category:
+            return jsonify(errno=RET.NODATA,errmsg="该分类不存在")
+
+        #3.2修改分类的名称
+        category.name = category_name
+
+    else: #新增
+        #3.3创建分类对象,设置名称
+        category = Category(name=category_name)
+
+        #3.4添加分类到数据库中
+        try:
+            db.session.add(category)
+            db.session.commit()
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR,errmsg="分类新增失败")
+
+    # 4.返回响应
+    return jsonify(errno=RET.OK,errmsg="操作成功")
+
+@admin_blue.route('/news_category')
+def news_category():
+    """
+    请求路径: /admin/news_category
+    请求方式: GET
+    请求参数: GET,无
+    返回值:GET,渲染news_type.html页面, data数据
+    @return:
+    """
+    # 1.获取所有的分类对象
+    try:
+        categories = Category.query.all()
+    except Exception as e:
+        current_app.logger.error(e)
+        return render_template("admin/news_type.html", errmsg="获取分类失败")
+
+    # 2.直接携带数据渲染页面
+    return render_template("admin/news_type.html", categories=categories)
+
 @admin_blue.route('/news_edit_detail', methods=['GET', 'POST'])
 def news_edit_detail():
     """
